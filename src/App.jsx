@@ -238,7 +238,7 @@ export default function App() {
   const { results, allSellTrades, allBuyTrades, allTrades } = computePnL(rawOrders, combine);
   const allCoins = [...new Set(Object.values(results).map((e) => e.coin))].sort();
 
-  // apply filters
+  // apply filters — coin first, then date, then re-aggregate P&L for the date window
   let entries = Object.values(results);
   if (filterCoin) entries = entries.filter((e) => e.coin === filterCoin);
 
@@ -262,10 +262,17 @@ export default function App() {
     combinedTrades = combinedTrades.filter((t) => t.date <= filterTo);
   }
 
+  // Re-aggregate realized P&L from the date-filtered sell trades
+  // but keep all coins that were in `entries` (coin filter already applied above)
   if (filterFrom || filterTo) {
+    // build a map of pair → aggregated P&L from filtered sells
     const agg = {};
+    // seed with all currently-visible entries so coins with 0 sells in range still appear
+    entries.forEach((e) => {
+      agg[e.pair] = { ...e, realizedPnL: 0, winTrades: 0, loseTrades: 0, grossWin: 0, grossLoss: 0 };
+    });
     trades.forEach((t) => {
-      if (!agg[t.pair]) agg[t.pair] = { ...results[t.pair], realizedPnL: 0, winTrades: 0, loseTrades: 0, grossWin: 0, grossLoss: 0 };
+      if (!agg[t.pair]) return; // skip pairs outside coin filter
       agg[t.pair].realizedPnL += t.pnl;
       if (t.pnl >= 0) { agg[t.pair].winTrades++; agg[t.pair].grossWin += t.pnl; }
       else { agg[t.pair].loseTrades++; agg[t.pair].grossLoss += t.pnl; }

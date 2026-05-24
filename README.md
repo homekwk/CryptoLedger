@@ -138,3 +138,9 @@ Your app will be live at `https://cryptoledger.vercel.app` (or similar) within ~
 - USDT + BUSD combine toggle
 - Filters: coin selector, date range, sort options, winners/losers/top 10
 - 100% in-browser — no data leaves your machine
+
+### v1.2.1 — Filter Bug Fixes
+- **Fixed:** Coin filter + date range now work together correctly — previously selecting a coin like BTC then changing the date range would show 0 data
+- **Fixed:** Date re-aggregation now seeds from the coin-filtered entries first, so coins with no sells in the date window show 0 P&L instead of disappearing
+- **Fixed:** Order History date range now anchors to the earliest buy OR sell trade (not just sells), so buy-only history is visible
+- **Improved:** Empty state messages added throughout — "No data in selected range", "No winners/losers in range", "No orders in selected range"
