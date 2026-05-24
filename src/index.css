@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #0a0c0f;
+  --bg2: #111318;
+  --bg3: #181c23;
+  --border: #1e2430;
+  --border2: #252d3a;
+  --text: #e8ecf0;
+  --text2: #8892a0;
+  --text3: #4a5568;
+  --accent: #00e5a0;
+  --accent2: #00b87a;
+  --red: #ff4d6a;
+  --yellow: #ffb800;
+  --blue: #3b82f6;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+select, input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 700px) {
+  .grid-2 { grid-template-columns: 1fr !important; }
+}
