@@ -33,10 +33,18 @@ const fmt$ = (v, sign = true) => {
 const fmtNum = (v, d = 4) =>
   Math.abs(v) < 0.0001 ? v.toExponential(3) : v.toLocaleString(undefined, { maximumFractionDigits: d });
 
+// Binance CSV uses "YY-MM-DD HH:MM:SS" — convert to "YYYY-MM-DD" for ISO comparisons
+const parseDate = (t) => {
+  if (!t) return "";
+  const d = t.trim().split(" ")[0].split("-"); // ["26","05","11"]
+  if (d.length !== 3) return t.trim().slice(0, 10);
+  return `20${d[0]}-${d[1]}-${d[2]}`; // "2026-05-11"
+};
+
 // ─── FIFO ENGINE ──────────────────────────────────────────────────────────────
 function computePnL(orders, combine) {
   const filled = orders.filter((r) => (r.Status || "").trim().toUpperCase() === "FILLED");
-  filled.sort((a, b) => new Date(a.Time) - new Date(b.Time));
+  filled.sort((a, b) => parseDate(a.Time).localeCompare(parseDate(b.Time)));
 
   const byPair = {};
   filled.forEach((o) => {
@@ -67,7 +75,7 @@ function computePnL(orders, combine) {
         buyQ.push({ qty, total, price });
         totalBuy += total;
         numTrades++;
-        allBuyTrades.push({ pair, coin, originalPair, date: (o.Time || "").slice(0, 10), qty, price, total, side: "BUY" });
+        allBuyTrades.push({ pair, coin, originalPair, date: parseDate(o.Time), qty, price, total, side: "BUY" });
       } else if (side === "SELL") {
         let rem = qty, cost = 0;
         while (rem > 1e-9 && buyQ.length) {
@@ -84,7 +92,7 @@ function computePnL(orders, combine) {
         realizedPnL += pnl; totalSell += total; numTrades++;
         if (pnl >= 0) { winTrades++; grossWin += pnl; }
         else { loseTrades++; grossLoss += pnl; }
-        allSellTrades.push({ pair, coin, originalPair, date: (o.Time || "").slice(0, 10), qty, price, revenue: total, cost, pnl, side: "SELL" });
+        allSellTrades.push({ pair, coin, originalPair, date: parseDate(o.Time), qty, price, revenue: total, cost, pnl, side: "SELL" });
       }
     });
 
@@ -93,9 +101,9 @@ function computePnL(orders, combine) {
     results[pair] = { coin, pair, realizedPnL, totalBuy, totalSell, winTrades, loseTrades, grossWin, grossLoss, numTrades, openQty, openCost, openAvgCost: openQty > 0 ? openCost / openQty : 0 };
   });
 
-  allSellTrades.sort((a, b) => new Date(a.date) - new Date(b.date));
-  allBuyTrades.sort((a, b) => new Date(a.date) - new Date(b.date));
-  const allTrades = [...allBuyTrades, ...allSellTrades].sort((a, b) => new Date(a.date) - new Date(b.date));
+  allSellTrades.sort((a, b) => a.date.localeCompare(b.date));
+  allBuyTrades.sort((a, b) => a.date.localeCompare(b.date));
+  const allTrades = [...allBuyTrades, ...allSellTrades].sort((a, b) => a.date.localeCompare(b.date));
   return { results, allSellTrades, allBuyTrades, allTrades };
 }
 

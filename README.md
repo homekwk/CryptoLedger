@@ -144,3 +144,8 @@ Your app will be live at `https://cryptoledger.vercel.app` (or similar) within ~
 - **Fixed:** Date re-aggregation now seeds from the coin-filtered entries first, so coins with no sells in the date window show 0 P&L instead of disappearing
 - **Fixed:** Order History date range now anchors to the earliest buy OR sell trade (not just sells), so buy-only history is visible
 - **Improved:** Empty state messages added throughout — "No data in selected range", "No winners/losers in range", "No orders in selected range"
+
+### v1.2.2 — Critical Date Parsing Fix
+- **Fixed (critical):** Binance CSV exports dates as `YY-MM-DD HH:MM:SS` (e.g. `26-05-11 08:11:13`), not `YYYY-MM-DD`. The old `slice(0,10)` produced `"26-05-11 0"` — a broken string that failed all date comparisons against the `YYYY-MM-DD` filter inputs, causing every single trade to be filtered out and all P&L to show as $0
+- **Fixed:** Date sort in the FIFO engine now uses `parseDate()` for correct chronological ordering
+- **Added:** `parseDate()` helper that converts `"YY-MM-DD HH:MM:SS"` → `"YYYY-MM-DD"` consistently across all date usages
